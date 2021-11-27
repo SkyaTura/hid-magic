@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ "$1" = "-s" ]; then
+  ! curl -s 127.0.0.1:9098/exec/setLayer -XPOST \
+  -H 'content-type: application/json' \
+  -d "$2" > /dev/null
+fi
+
+if [ "$1" = "-g" ]; then
+  ! cat /tmp/zsa-layer-state
+fi
