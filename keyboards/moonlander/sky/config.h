@@ -22,3 +22,4 @@
 #define FIRMWARE_VERSION u8"custom/skyatura"
 #define RGB_MATRIX_STARTUP_SPD 60
 #define LAYER_STATE_8BIT
+

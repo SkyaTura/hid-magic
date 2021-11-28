@@ -30,12 +30,6 @@ void mac_exec_spotlight(uint16_t keycode) {
 
 void mac_process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
-        case ST_TMUX_W: {
-            if (record->event.pressed) {
-                SEND_STRING(SS_LCTRL(SS_TAP(X_BSLASH)) SS_DELAY(100) SS_TAP(X_W));
-            }
-            break;
-        }
         case ST_LAUNCH_LOL_COMBO_3: {
             if (record->event.pressed) {
                 mac_exec_spotlight(ST_LAUNCH_DISCORD);

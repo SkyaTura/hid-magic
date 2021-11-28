@@ -48,10 +48,6 @@
 #include "keymap_belgian.h"
 */
 
-void keyboard_post_init_user(void) {
-  rgb_matrix_enable();
-}
-
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   sky_process_record_user(keycode, record);
   mac_process_record_user(keycode, record);
@@ -133,3 +129,6 @@ qk_tap_dance_action_t tap_dance_actions[] = {
         [DANCE_0] = ACTION_TAP_DANCE_FN_ADVANCED(on_dance_0, dance_0_finished, dance_0_reset),
 };
 
+void keyboard_post_init_user(void) {
+  rgb_matrix_enable();
+}

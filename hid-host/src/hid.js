@@ -1,17 +1,10 @@
 const HID = require("node-hid");
 const log = require("./log");
 const utils = require("./utils");
-const fs = require("fs");
-const lol = require("./lol");
+const modules = require("./modules");
+const enums = require("./enums");
 
-const STATE = {
-  layerState: 0,
-};
 const RESTART_DELAY = 5000;
-
-const FILE_PREFIX = "/tmp/zsa";
-const writeFile = (name, data) =>
-  fs.writeFileSync(`${FILE_PREFIX}-${name}`, data);
 
 const HID_REF = {
   manufacturer: "ZSA",
@@ -22,94 +15,69 @@ const HID_REF = {
 
 let device = null;
 
-const testData = null && [
-  1,
-  0,
-  ...[1, 1, 1, 1],
-  ...[1, 1, 1, 1, 1, 1, 1],
-  ...[1, 2, 0, 1, 1],
-  ...[1, 1, 0, 2, 1],
-  ...[1, 1],
-  ...[0, 0, 0, 0],
-  ...[0, 0, 0, 0],
-];
-const commands = {
-  setLayer: {
-    code: 129,
-    condition: (layer) => layer !== STATE.layerState,
-    format: (layer) => parseInt(layer, 10),
-  },
-  getLayer: {
-    handler: () => STATE.layerState,
-  },
-  sendLolInfo: {
-    code: 130,
-    condition: () => STATE.layerState === 2,
-    format: (data) =>
-      !data
-        ? testData || [0]
-        : [
-            1, // Game running
-            data.isDead, // Is alive
-            ...data.abilities, // 4 abilities
-            ...data.items, // 7 items
-            ...data.teamOrder, // 5 players
-            ...data.teamChaos, // 5 players
-            data.spells.d, // 1 spell
-            data.spells.f, // 1 spell
-            ...data.orderDragons, // 4 dragons
-            ...data.chaosDragons, // 4 dragons
-          ],
-  },
-};
+const handlers = [];
 
-const listeners = {
-  [131]: (payload) => {
-    const layerState = payload[0] - 1;
-    writeFile("layer-state", layerState.toString());
-    STATE.layerState = layerState;
-    switch (layerState) {
-      case 2: {
-        lol.start(exports);
-        break;
-      }
-      case 0:
-      case 1:
-      default:
-        lol.clear();
+const ctx = {
+  enums,
+  registerOne(item) {
+    if (item.name in enums.codes) return;
+    handlers.push(item);
+  },
+  register(items) {
+    items.forEach((item) => this.registerOne(item));
+  },
+  writeCommand(id, data) {
+    log("out", { id, data });
+    const bytes = utils.commandToBytes(id, data);
+    device.write(bytes);
+    return bytes;
+  },
+  get device() {
+    return device;
+  },
+  exec(id, data) {
+    if (!device) {
+      console.error("Device is no connected.");
+      return;
     }
+    const code = enums.codes.indexOf(id);
+    const commands = handlers.filter(
+      (command) => command.type === "out" && command.name === id
+    );
+    if (!commands.length) {
+      log("Unknown command: ", id);
+      return;
+    }
+    commands.forEach((command) => this.execOut(command, data, code));
   },
-  [132]: (payload) => log("LOL Response: ", payload.join("")),
+  execIn(listener, data, code) {
+    const { format, handler, condition } = listener;
+    const formatted = format ? format(data) : data;
+    if (condition && !condition(formatted, data)) return;
+
+    if (handler) {
+      handler(formatted, data, code);
+      return;
+    }
+
+    this.writeCommand(code, formatted);
+  },
+
+  execOut(command, data, code) {
+    const { format, handler, condition } = command;
+    const formatted = format ? format(data) : data;
+    if (condition && !condition(formatted, data)) return;
+
+    if (handler) {
+      handler(formatted, data, code);
+      return;
+    }
+
+    this.writeCommand(code, formatted);
+  },
 };
 
-const writeCommand = (id, data) => {
-  log("out", { id, data });
-  const bytes = utils.commandToBytes(id, data);
-  device.write(bytes);
-  return bytes;
-};
-
-const exec = (id, data) => {
-  if (!device) {
-    console.error("Device is no connected.");
-    return;
-  }
-  const command = commands[id];
-  if (!command) {
-    log("Unknown command: ", id);
-    return;
-  }
-  const { code, format, handler, condition } = command;
-  const formatted = format ? format(data) : data;
-  if (condition && !condition(formatted, data)) {
-    return;
-  }
-  if (handler) {
-    handler(formatted, data);
-    return;
-  }
-  writeCommand(code, formatted);
-};
+modules.forEach((item) => item(ctx));
 
 const list = () => HID.devices().filter(utils.match(HID_REF));
 
@@ -130,16 +98,30 @@ const connect = async () => {
   console.info("Keyboard found:", keyboard);
   device = new HID.HID(keyboard.path);
 
-  device.on("error", start);
-  device.on("data", (data) => {
-    const [code, ...payload] = [...data];
-    const listener = listeners[code];
-    log("in", { code, data: payload.join(" ") });
-    if (!listener) return;
-    listener(payload);
+  device.on("error", () => {
+    handlers
+      .filter((item) => item.type === "keyboard_error")
+      .forEach((item) => item.handler(device));
+    start();
+  });
+  device.on("data", ([code, ...data]) => {
+    const name = enums.codes[code];
+    log("in", { code, name, data: data.join(" ") });
+    if (!name) return;
+    const listeners = handlers.filter(
+      (listener) => listener.type === "in" && listener.name === name
+    );
+    if (!listeners.length) {
+      log("Unknown listener: ", name);
+      return;
+    }
+    listeners.forEach((listener) => ctx.execIn(listener, data, code));
   });
 
   console.info("Keyboard connected.");
+  handlers
+    .filter((item) => item.type === "keyboard_connected")
+    .forEach((item) => item.handler(device));
 };
 
 function start() {
@@ -152,5 +134,6 @@ function restart() {
 }
 
 exports.start = start;
-exports.exec = exec;
+exports.exec = ctx.exec;
+exports.ctx = ctx;
 exports.list = list;

@@ -1,7 +1,12 @@
 const Fastify = require("fastify");
+const CORS = require("fastify-cors");
 const log = require("./log");
 const hid = require("./hid");
 const fastify = Fastify({ logger: false });
+
+fastify.register(require("fastify-cors"), {
+  // put your options here
+});
 
 fastify.route({
   method: "POST",
@@ -12,9 +17,8 @@ fastify.route({
     },
   },
   handler: (request, reply) => {
-    log("aaa");
     try {
-      const result = hid.exec(request.params.id, request.body);
+      const result = hid.ctx.exec(request.params.id, request.body);
       reply.code(200).send({ result });
     } catch (error) {
       console.error(error);

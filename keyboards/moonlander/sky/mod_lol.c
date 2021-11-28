@@ -4,7 +4,7 @@
 #define  CL_OFF              {   0,    0,    0    }
 #define  CL_NEUTRAL          {   15,   15,   15   }
 #define  CL_TRANSPARENT      {   -1,   -1,   -1   }
-#define  CL_PLAYER_EMPTY     {   0,    255,  0    }
+#define  CL_PLAYER_EMPTY     {   0,    0,  0    }
 #define  CL_PLAYER_ALIVE     {   0,    255,  0    }
 #define  CL_PLAYER_DEAD      {   255,  0,  0    }
 #define  CL_ITEM_EMPTY       {   0,    0,    0    }
@@ -146,7 +146,7 @@ void lol_set_state(uint8_t* command) {
 
 int lol_colors_fixed[][3] = {
     CL_NEUTRAL,
-    CL_PLAYER_DEAD
+    { -1, -1, -1 }
 };
 int lol_colors_skill[][3] = {
     CL_SKILL_EMPTY,
@@ -159,7 +159,7 @@ int lol_colors_skill[][3] = {
 };
 
 int lol_colors_item[][3] = {
-    CL_SKILL_EMPTY,
+    CL_ITEM_EMPTY,
     CL_ITEM,
     CL_ITEM_USABLE,
     CL_ITEM_CONSUMABLE
@@ -240,8 +240,7 @@ void lol_rgb_set_layer_color(void) {
             continue;
         }
         if (lol_state[1] == 1) {
-            // TODO: Animate death
-            lol_rgb_set_key_color(key, 0, 1);
+            // Keep matrix animation effect
             continue;
         }
         if (index < 0) {

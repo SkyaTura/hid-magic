@@ -1,2 +1,3 @@
 node_modules
+/qmk_firmware
 *.tmp

@@ -132,12 +132,28 @@ void sky_set_layer(int layer) {
     }
     // Apply per layer behaviors
     switch (layer) {
+        case 0: {
+            autoshift_enable();
+            rgb_matrix_mode_noeeprom(RGB_MATRIX_CUSTOM_SKY_MAIN_LAYER_EFFECT);
+            rgb_matrix_set_speed_noeeprom(255);
+            rgb_matrix_enable_noeeprom();
+            break;
+        }
+        case 1: {
+            autoshift_enable();
+            rgb_matrix_mode_noeeprom(21);
+            rgb_matrix_set_speed_noeeprom(255);
+            rgb_matrix_enable_noeeprom();
+            break;
+        }
         case 2: {
+            rgb_matrix_mode_noeeprom(RGB_MATRIX_CUSTOM_MOD_LOL_ANIM_EFFECT);
+            rgb_matrix_set_speed_noeeprom(255);
             autoshift_disable();
             break;
         }
         default: {
-            autoshift_enable();
+            rgb_matrix_mode_noeeprom(0);
         }
     }
     // Emit HID event

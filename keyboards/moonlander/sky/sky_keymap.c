@@ -85,7 +85,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ____,    ____,             ____,                ____,            ____,             ____,             ____,
     ____,    ____,             ____,                ____,            ____,             ____,             ____,
     ____,    ____,             ____,                ____,            ____,             ____,             ____,
-    ____,    DYN_MACRO_PLAY2,  DYN_REC_START2,      DYN_REC_STOP,    ____,             ____,             ____
+    ____,    DYN_MACRO_PLAY2,  DYN_REC_START2,      DYN_REC_STOP,    ____,             ____,             DEBUG
   ),
   [6] = LAYOUT_moonlander_split(
     /*     1,                   2,                      3,                      4,                  5,                   */

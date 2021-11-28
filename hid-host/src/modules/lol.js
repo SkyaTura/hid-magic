@@ -1,5 +1,6 @@
 const Axios = require("axios");
 const https = require("https");
+const enums = require("../enums");
 const axios = Axios.create({
   baseURL: "https://127.0.0.1:2999/liveclientdata/",
   httpsAgent: new https.Agent({
@@ -7,8 +8,19 @@ const axios = Axios.create({
   }),
 });
 
-const POOLING_RATE = 1000;
+const POOLING_RATE = 100;
 let interval = null;
+
+let testData = null && [
+  1,
+  0,
+  ...[1, 1, 1, 1],
+  ...[1, 2, 3, 1, 1, 1, 2],
+  ...[2, 2, 1, 1, 2],
+  ...[2, 2, 2, 2, 1],
+  ...[4, 3, 0, 0],
+  ...[2, 3, 3, 3],
+];
 
 const clear = () => {
   if (!interval) return;
@@ -53,7 +65,7 @@ const getSpellId = (name) => {
 const tickFactory = (hid) => async () => {
   const response = await axios.get("/allgamedata").catch(() => null);
   if (!response) {
-    hid.exec("sendLolInfo", null);
+    hid.exec("lol_set_state", null);
     return;
   }
   const game = response.data;
@@ -138,7 +150,7 @@ const tickFactory = (hid) => async () => {
     chaosDragons,
     isDead: me.isDead ? 1 : 0,
   };
-  hid.exec("sendLolInfo", result);
+  hid.exec("lol_set_state", result);
 };
 const start = (hid) => {
   if (interval) return;
@@ -147,5 +159,70 @@ const start = (hid) => {
   tick();
 };
 
-exports.clear = clear;
-exports.start = start;
+module.exports = (ctx) => {
+  ctx.register([
+    {
+      type: "out",
+      name: "lol_test_state",
+      condition: () => ctx.layer.activeLayer === 2,
+      handler(data) {
+        testData = data;
+      },
+    },
+    {
+      type: "out",
+      name: "lol_set_state",
+      condition: () => ctx.layer.activeLayer === 2,
+      format: (data) =>
+        testData ||
+        (!data
+          ? [0]
+          : [
+              1, // Game running
+              data.isDead, // Is alive
+              ...data.abilities, // 4 abilities
+              ...data.items, // 7 items
+              ...data.teamOrder, // 5 players
+              ...data.teamChaos, // 5 players
+              data.spells.d, // 1 spell
+              data.spells.f, // 1 spell
+              ...data.orderDragons, // 4 dragons
+              ...data.chaosDragons, // 4 dragons
+            ]),
+    },
+    {
+      type: "in",
+      name: "lol_response",
+      handler(payload) {
+        log("LOL Response: ", payload.join(""));
+      },
+    },
+    {
+      type: "keyboard_error",
+      name: "lol_keyboard_error",
+      handler(payload) {
+        clear();
+      },
+    },
+    {
+      type: "keyboard_connected",
+      name: "lol_keyboard_connected",
+      handler(payload) {
+        if (ctx.layer.activeLayer !== 2) return;
+        start(ctx.hid);
+      },
+    },
+    {
+      type: "in",
+      name: "layer_changed",
+      handler(payload) {
+        const activeLayer = payload[0] - 1;
+        if (activeLayer !== 2) {
+          clear();
+          return;
+        }
+        start(ctx);
+      },
+    },
+  ]);
+};

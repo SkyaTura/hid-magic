@@ -50,13 +50,18 @@ const uint8_t PROGMEM ledmap[][DRIVER_LED_TOTAL][3] = {
 
 };
 
+HSV sky_get_key_color(int layer, int key) {
+    HSV hsv = {
+      .h = pgm_read_byte(&ledmap[layer][key][0]),
+      .s = pgm_read_byte(&ledmap[layer][key][1]),
+      .v = pgm_read_byte(&ledmap[layer][key][2]),
+    };
+    return hsv;
+}
+
 void set_layer_color(int layer) {
   for (int i = 0; i < DRIVER_LED_TOTAL; i++) {
-    HSV hsv = {
-      .h = pgm_read_byte(&ledmap[layer][i][0]),
-      .s = pgm_read_byte(&ledmap[layer][i][1]),
-      .v = pgm_read_byte(&ledmap[layer][i][2]),
-    };
+    HSV hsv = sky_get_key_color(layer, i);
     if (!hsv.h && !hsv.s && !hsv.v) {
         if (layer != 1) {
             rgb_matrix_set_color( i, 0, 0, 0 );

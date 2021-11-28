@@ -10,8 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "active-win": "^7.6.1",
     "axios": "^0.24.0",
+    "debounce": "^1.2.1",
     "fastify": "^3.24.0",
+    "fastify-cors": "^6.0.2",
     "node-hid": "^2.1.1"
   }
 }
