@@ -32,6 +32,8 @@ If you have any suggestion of what could be added, I'd like to hear.
 
 ## Layer dance
 
+![mp4](examples/nvim.mp4)
+
 - The default layer is always Colemak
 - If NVim window is active, the main layer is defined by the current mode
   - QWERTY for: Normal, Visual
@@ -40,8 +42,9 @@ If you have any suggestion of what could be added, I'd like to hear.
 
 ## League of Legends MOD
 
-- Automatically synchronizes with the active match
+![mp4](examples/lol.mp4)
 
+- Automatically synchronizes with the active match
 - Available skills
   - Only lights skill that has at least 1 level
   - Cooldowns are **not** indicated (in compliance with Riot terms)
