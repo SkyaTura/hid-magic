@@ -135,7 +135,7 @@ void sky_set_layer(int layer) {
         case 0: {
             autoshift_enable();
             rgb_matrix_mode_noeeprom(RGB_MATRIX_CUSTOM_SKY_MAIN_LAYER_EFFECT);
-            rgb_matrix_set_speed_noeeprom(255);
+            rgb_matrix_set_speed_noeeprom(125);
             rgb_matrix_enable_noeeprom();
             break;
         }

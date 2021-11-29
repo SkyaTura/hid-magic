@@ -3,7 +3,7 @@ void sky_process_record_user(uint16_t keycode, keyrecord_t *record) {
         case ST_TMUX_W: {
             if (record->event.pressed) {
               char str[5];
-              itoa(rgb_matrix_get_mode(), str, 10);
+              itoa(g_last_hit_tracker.count, str, 10);
               SEND_STRING(str);
               SEND_STRING(" ");
               itoa(rgb_matrix_get_speed(), str, 10);

@@ -131,4 +131,5 @@ qk_tap_dance_action_t tap_dance_actions[] = {
 
 void keyboard_post_init_user(void) {
   rgb_matrix_enable();
+  sky_set_layer(0);
 }
