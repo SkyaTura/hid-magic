@@ -8,7 +8,8 @@ const axios = Axios.create({
   }),
 });
 
-const POOLING_RATE = 100;
+const POOLING_RATE = 1000;
+
 let interval = null;
 
 let testData = null && [

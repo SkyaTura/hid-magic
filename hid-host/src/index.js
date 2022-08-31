@@ -10,15 +10,35 @@ fastify.register(require("fastify-cors"), {
 
 fastify.route({
   method: "POST",
+  url: "/get/:id",
+  schema: {
+    params: {
+      id: { type: "string" },
+    },
+  },
+  handler: async (request, reply) => {
+    try {
+      const result = await hid.ctx.execOne(request.params.id, request.body);
+      if (result === null) throw new Error("Unknown result");
+      reply.code(200).send(result);
+    } catch (error) {
+      log(error);
+      reply.code(500).send(error);
+    }
+  },
+});
+
+fastify.route({
+  method: "POST",
   url: "/exec/:id",
   schema: {
     params: {
       id: { type: "string" },
     },
   },
-  handler: (request, reply) => {
+  handler: async (request, reply) => {
     try {
-      const result = hid.ctx.exec(request.params.id, request.body);
+      const result = await hid.ctx.exec(request.params.id, request.body);
       reply.code(200).send({ result });
     } catch (error) {
       console.error(error);

@@ -52,5 +52,7 @@ enum custom_keycodes {
   ST_MACRO_2,
   ST_MACRO_3,
   ST_MACRO_4,
+  ST_MACRO_5,
+  ST_MACRO_6,
   ST_TMUX_W
 };

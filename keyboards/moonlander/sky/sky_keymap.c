@@ -74,11 +74,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ____,  ____,          ____,             ____,                 ____,                 ____,                 ____
   ),
   [5] = LAYOUT_moonlander_split(
-    ____,    WEBUSB_PAIR,      TO(0),               TO(2),           MOON_LED_LEVEL,   ____,             ____,
+    ST_MACRO_5,    WEBUSB_PAIR,      TO(0),               TO(2),           MOON_LED_LEVEL,   ____,             ____,
     AU_TOG,  RGB_SAI,          TOGGLE_LAYER_COLOR,  RGB_HUI,         RGB_VAI,          RGB_SPI,          RGB_MOD,
     MU_TOG,  RGB_SAD,          RGB_TOG,             RGB_HUD,         RGB_VAD,          RGB_SPD,          RGB_SLD,
     MU_MOD,  HSV_172_255_255,  HSV_86_255_128,      HSV_27_255_255,  HSV_215_255_128,  HSV_0_255_255,    ____,
-    ____,    KC_ASRP,          KC_ASDN,             KC_ASUP,         KC_ASTG,          ____,             ____,
+    ST_MACRO_6,    KC_ASRP,          KC_ASDN,             KC_ASUP,         KC_ASTG,          ____,             ____,
     ____,    ____,             ____,                DYN_REC_STOP,    DYN_REC_START1,   DYN_MACRO_PLAY1,  ____,
     ____,    ____,             ____,                ____,            ____,             ____,             RESET,
     ____,    ____,             ____,                ____,            ____,             ____,             KC_SYSTEM_SLEEP,

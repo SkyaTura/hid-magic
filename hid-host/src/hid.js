@@ -36,19 +36,40 @@ const ctx = {
     return device;
   },
   exec(id, data) {
-    if (!device) {
-      console.error("Device is no connected.");
-      return;
-    }
     const code = enums.codes.indexOf(id);
     const commands = handlers.filter(
-      (command) => command.type === "out" && command.name === id
+      (command) =>
+        command.type === "out" &&
+        command.name === id &&
+        (command.allowOffline || !!this.device)
     );
     if (!commands.length) {
+      if (!device) {
+        log("Device is no connected.");
+        return;
+      }
       log("Unknown command: ", id);
       return;
     }
     commands.forEach((command) => this.execOut(command, data, code));
+  },
+  execOne(id, data) {
+    const code = enums.codes.indexOf(id);
+    const command = handlers.find(
+      (command) =>
+        command.type === "out" &&
+        command.name === id &&
+        (command.allowOffline || !!this.device)
+    );
+    if (!command) {
+      if (!device) {
+        console.error("Device is no connected.");
+        return null;
+      }
+      log("Unknown command: ", id);
+      return null;
+    }
+    return this.execOut(command, data, code);
   },
   execIn(listener, data, code) {
     const { format, handler, condition } = listener;
@@ -56,8 +77,7 @@ const ctx = {
     if (condition && !condition(formatted, data)) return;
 
     if (handler) {
-      handler(formatted, data, code);
-      return;
+      return handler(formatted, data, code);
     }
 
     this.writeCommand(code, formatted);
@@ -69,8 +89,7 @@ const ctx = {
     if (condition && !condition(formatted, data)) return;
 
     if (handler) {
-      handler(formatted, data, code);
-      return;
+      return handler(formatted, data, code);
     }
 
     this.writeCommand(code, formatted);
@@ -82,23 +101,24 @@ modules.forEach((item) => item(ctx));
 const list = () => HID.devices().filter(utils.match(HID_REF));
 
 const connect = async () => {
-  console.info("Fetching device list");
+  log("Fetching device list");
   const devices = list();
-  console.info("Devices found: ", devices.length);
+  log("Devices found: ", devices.length);
 
-  console.info("Finding Keyboard");
+  log("Finding Keyboard");
   const keyboard = devices[0];
 
   if (!keyboard) {
-    console.info("Keyboard not found!");
+    log("Keyboard not found!");
     restart();
     return;
   }
 
-  console.info("Keyboard found:", keyboard);
+  log("Keyboard found:", keyboard);
   device = new HID.HID(keyboard.path);
 
   device.on("error", () => {
+    console.error("Keyboard error");
     handlers
       .filter((item) => item.type === "keyboard_error")
       .forEach((item) => item.handler(device));
